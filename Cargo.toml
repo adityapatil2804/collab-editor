@@ -1,0 +1,11 @@
+[workspace]
+resolver = "2"
+members = ["crates/crdt-core"]
+
+[workspace.package]
+edition = "2021"
+license = "MIT"
+authors = ["Aditya Patil"]
+
+[profile.release]
+debug = true
