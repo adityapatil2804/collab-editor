@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/crdt-core"]
+members = ["crates/crdt-core", "crates/collab-server"]
 
 [workspace.package]
 edition = "2021"

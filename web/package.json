@@ -1,0 +1,14 @@
+{
+  "name": "collab-editor-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p .",
+    "watch": "tsc -p . --watch",
+    "test:crosslang": "node test/crosslang.mjs",
+    "test:e2e": "node test/e2e.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}

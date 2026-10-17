@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Collab</title>
+    <link rel="stylesheet" href="style.css" />
+    <script type="module" src="dist/main.js"></script>
+  </head>
+  <body>
+    <header class="bar">
+      <div class="title">
+        <span class="mark" aria-hidden="true">¶</span>
+        <h1 id="doc-name">welcome</h1>
+        <span id="status" class="status" data-state="offline" role="status">Offline</span>
+      </div>
+      <ul id="peers" class="peers" aria-label="People editing"></ul>
+      <div class="actions">
+        <label class="name">
+          <span>You</span>
+          <input id="name" maxlength="40" autocomplete="off" spellcheck="false" />
+        </label>
+        <button id="offline" type="button" aria-pressed="false">Go offline</button>
+        <button id="share" type="button">Copy link</button>
+      </div>
+    </header>
+
+    <main class="page">
+      <div class="editor-wrap">
+        <textarea
+          id="editor"
+          spellcheck="false"
+          autocapitalize="off"
+          aria-label="Shared document"
+          placeholder="Start typing. Open this link in another tab or device to edit together."
+        ></textarea>
+        <div id="overlay" class="overlay" aria-hidden="true"></div>
+      </div>
+    </main>
+
+    <footer class="foot">
+      <span id="stats"></span>
+      <span class="hint">Ctrl/⌘+Z undoes only your own edits</span>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,257 @@
+:root {
+  --paper: #f6f3ec;
+  --sheet: #fffdf8;
+  --ink: #1d1b16;
+  --muted: #6f6a5f;
+  --rule: #ddd6c6;
+  --accent: #b5480f;
+  --live: #2b8a3e;
+  --warn: #c48a00;
+  --off: #9a3412;
+  --editor-font: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  --ui-font: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #16150f;
+    --sheet: #1e1c16;
+    --ink: #ece6d8;
+    --muted: #a39d8f;
+    --rule: #37332a;
+    --accent: #f08c4f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--ui-font);
+}
+
+/* ---------------------------------------------------------------- header */
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+.mark {
+  color: var(--accent);
+  font-size: 22px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status {
+  font: 600 11px/1 var(--editor-font);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}
+.status[data-state="online"] { color: var(--live); }
+.status[data-state="connecting"] { color: var(--warn); }
+.status[data-state="offline"] { color: var(--off); }
+
+.peers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  flex: 1;
+}
+
+.peers li {
+  font: 12px/1 var(--editor-font);
+  padding: 5px 9px;
+  border-radius: 4px;
+  color: #fff;
+  background: var(--c);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+input,
+button {
+  font: 13px var(--editor-font);
+  color: var(--ink);
+  background: var(--sheet);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+
+input {
+  width: 9.5em;
+}
+
+button {
+  cursor: pointer;
+}
+button:hover {
+  border-color: var(--ink);
+}
+button[aria-pressed="true"] {
+  background: var(--off);
+  border-color: var(--off);
+  color: #fff;
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------- editor */
+
+.page {
+  padding: 24px;
+  min-height: 0;
+}
+
+.editor-wrap {
+  position: relative;
+  height: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  background: var(--sheet);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  box-shadow: 0 1px 0 var(--rule), 0 12px 30px -18px rgb(0 0 0 / 0.35);
+  overflow: hidden;
+}
+
+/* The textarea and its overlay must share every metric that affects layout. */
+#editor,
+.overlay {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  border: 0;
+  padding: 28px 32px;
+  font: 15px/1.65 var(--editor-font);
+  letter-spacing: 0;
+  tab-size: 4;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+#editor {
+  width: 100%;
+  height: 100%;
+  resize: none;
+  overflow-y: scroll;
+  background: transparent;
+  color: var(--ink);
+  caret-color: var(--accent);
+}
+#editor:focus {
+  outline: none;
+}
+
+.overlay {
+  pointer-events: none;
+  overflow: hidden;
+  color: transparent;
+}
+
+.rc {
+  position: relative;
+}
+.rc::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: 0.1em;
+  height: 1.3em;
+  border-left: 2px solid var(--c);
+}
+.rc-name {
+  position: absolute;
+  left: -1px;
+  bottom: 1.25em;
+  padding: 1px 5px;
+  border-radius: 3px 3px 3px 0;
+  font: 600 10px/1.4 var(--editor-font);
+  color: #fff;
+  background: var(--c);
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------- footer */
+
+.foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 24px 14px;
+  font: 12px var(--editor-font);
+  color: var(--muted);
+}
+
+@media (max-width: 640px) {
+  .bar,
+  .page,
+  .foot {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .actions {
+    margin-left: 0;
+    flex-wrap: wrap;
+  }
+  .hint {
+    display: none;
+  }
+  #editor,
+  .overlay {
+    padding: 18px;
+  }
+}
