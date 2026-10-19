@@ -2,6 +2,10 @@
 
 A real-time collaborative text editor built on a custom sequence CRDT (Rust + TypeScript). Several people can edit one document at once, work offline, and merge cleanly when they reconnect, without a central server deciding the order of edits.
 
+**Live demo:** https://collab-editor-5ois.onrender.com/?doc=demo (free hosting: the first load after 15 idle minutes takes about 50 seconds)
+
+**Demo video (56 s):** [docs/collab-editor-demo.mp4](docs/collab-editor-demo.mp4): a laptop and an Android phone editing together, the phone going offline, both sides typing, then reconnecting and merging.
+
 ```
 browser (TypeScript)                      server (Rust, std only)
 ┌──────────────────────────┐   WebSocket  ┌──────────────────────────────┐
