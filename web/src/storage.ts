@@ -1,37 +1,46 @@
 // Offline persistence in IndexedDB.
 //
-// Each document's ops are stored as one record. Saves *merge* with what is
-// already stored (union by op id inside one transaction), so two tabs editing
-// the same document offline never overwrite each other's work.
+// Every op is its own record, keyed [doc, counter, replica], written as soon
+// as it exists (local keystroke or remote op). So:
+// - saving is O(ops written), not O(document) per keystroke;
+// - nothing is lost if the tab closes right after typing (no debounce window);
+// - two tabs writing the same document never overwrite each other: records
+//   are unique per op id, and writing one twice is harmless.
 
 import type { Op } from "./crdt.js";
 import { JsonOp, opFromJson, opToJson } from "./protocol.js";
 
 const DB = "collab-editor";
-const STORE = "docs";
+const STORE = "ops";
+
+let dbPromise: Promise<IDBDatabase> | null = null;
 
 function open(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB, 1);
-    req.onupgradeneeded = () => req.result.createObjectStore(STORE, { keyPath: "name" });
+  dbPromise ??= new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB, 2);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (db.objectStoreNames.contains("docs")) db.deleteObjectStore("docs"); // v1 layout
+      if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE);
+    };
     req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
+    req.onerror = () => {
+      dbPromise = null;
+      reject(req.error);
+    };
   });
+  return dbPromise;
 }
 
-interface Record {
-  name: string;
-  ops: JsonOp[];
-}
-
-const key = (j: JsonOp) => `${j.id[0]}:${j.id[1]}`;
+/** All of a document's keys: [doc, <any number>, <any number>]. */
+const docRange = (name: string) => IDBKeyRange.bound([name], [name, []]);
 
 export async function loadOps(name: string): Promise<Op[]> {
   try {
     const db = await open();
     return await new Promise((resolve, reject) => {
-      const req = db.transaction(STORE).objectStore(STORE).get(name);
-      req.onsuccess = () => resolve(((req.result as Record | undefined)?.ops ?? []).map(opFromJson));
+      const req = db.transaction(STORE).objectStore(STORE).getAll(docRange(name));
+      req.onsuccess = () => resolve((req.result as JsonOp[]).map(opFromJson));
       req.onerror = () => reject(req.error);
     });
   } catch {
@@ -40,25 +49,13 @@ export async function loadOps(name: string): Promise<Op[]> {
 }
 
 export async function saveOps(name: string, ops: Op[]): Promise<void> {
+  if (!ops.length) return;
   try {
     const db = await open();
     await new Promise<void>((resolve, reject) => {
       const tx = db.transaction(STORE, "readwrite");
       const store = tx.objectStore(STORE);
-      const req = store.get(name);
-      req.onsuccess = () => {
-        const existing = (req.result as Record | undefined)?.ops ?? [];
-        const seen = new Set(existing.map(key));
-        const merged = existing.slice();
-        for (const op of ops) {
-          const j = opToJson(op);
-          if (!seen.has(key(j))) {
-            seen.add(key(j));
-            merged.push(j);
-          }
-        }
-        store.put({ name, ops: merged } satisfies Record);
-      };
+      for (const op of ops) store.put(opToJson(op), [name, op.id.counter, op.id.replica]);
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);
     });

@@ -36,19 +36,13 @@ async function main() {
   const nameInput = $<HTMLInputElement>("name");
   nameInput.value = me.name;
 
-  let saveTimer = 0;
-  const persist = () => {
-    clearTimeout(saveTimer);
-    saveTimer = window.setTimeout(() => saveOps(docName, doc.log), 300);
-  };
-
   const tabs = "BroadcastChannel" in window ? new BroadcastChannel(`collab:${docName}`) : null;
 
   const editor: Editor = new Editor($("editor"), $("overlay"), doc, {
     localOps(ops) {
       sync.sendOps(ops);
       tabs?.postMessage(ops.map(opToJson));
-      persist();
+      saveOps(docName, ops);
       refreshStats();
     },
     caret(cursor) {
@@ -61,9 +55,9 @@ async function main() {
     `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`,
     docName,
     {
-      remote(patches) {
+      remote(patches, ops) {
         editor.applyRemote(patches);
-        persist();
+        saveOps(docName, ops);
         refreshStats();
       },
       status: (s) => showStatus(s),
@@ -139,7 +133,6 @@ async function main() {
   refreshStats();
   sync.connect();
   sync.sendPresence({ ...me, cursor: null });
-  window.addEventListener("pagehide", () => saveOps(docName, doc.log));
   window.addEventListener("online", () => sync.retryNow());
 
   // Service worker: lets the app open with no network (needs HTTPS or localhost).
