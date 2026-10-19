@@ -6,6 +6,10 @@ A real-time collaborative text editor built on a custom sequence CRDT (Rust + Ty
 
 **Demo video (56 s):** [docs/collab-editor-demo.mp4](docs/collab-editor-demo.mp4): a laptop and an Android phone editing together, the phone going offline, both sides typing, then reconnecting and merging.
 
+https://github.com/user-attachments/assets/8b7338b6-7c2c-47da-b854-b012afe3720c
+
+
+
 ```
 browser (TypeScript)                      server (Rust, std only)
 ┌──────────────────────────┐   WebSocket  ┌──────────────────────────────┐
