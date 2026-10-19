@@ -31,6 +31,10 @@ cargo run --release --bin collab-server            # http://localhost:8080
 
 Open `http://localhost:8080/?doc=demo` in two windows. Use **Go offline** to simulate losing the network, edit in both windows, then reconnect.
 
+## Deploy (free)
+
+`render.yaml` deploys the Docker image to Render's free tier: push to GitHub, then on render.com choose **New → Blueprint** and pick the repo. The free instance sleeps after 15 idle minutes and has no persistent disk; documents survive restarts because every client keeps an offline copy and re-uploads it on reconnect. `fly.toml` is the paid alternative with a persistent volume.
+
 ## Results
 
 All numbers come from a 2-core Xeon VM where the server and every load-generator client share the machine. Full tables are in [docs/BENCHMARKS.md](docs/BENCHMARKS.md).

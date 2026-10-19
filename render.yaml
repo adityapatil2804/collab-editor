@@ -1,0 +1,11 @@
+# Render Blueprint: free Docker web service.
+# render.com -> New -> Blueprint -> pick this repo -> Apply.
+# Free tier: sleeps after 15 idle minutes (~1 min to wake); no persistent disk,
+# so the server's op log resets on restart. Clients keep full offline copies
+# and re-upload them on reconnect, so documents come back.
+services:
+  - type: web
+    name: collab-editor
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
