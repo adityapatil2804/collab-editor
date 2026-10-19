@@ -27,10 +27,13 @@ use std::io::{self, BufRead, BufReader, Read, Seek, SeekFrom, Write};
 use std::net::{Shutdown, TcpStream};
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
-use std::sync::mpsc::{channel, sync_channel, Sender, SyncSender, TrySendError};
+use std::sync::mpsc::{channel, sync_channel, RecvTimeoutError, Sender, SyncSender, TrySendError};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
+/// Idle connections get a WebSocket ping this often. Browsers answer pings
+/// automatically, so proxies (e.g. Fly.io's) never see an idle socket.
+const KEEPALIVE: Duration = Duration::from_secs(25);
 /// Frames queued per client before it is considered too slow.
 const OUTBOX: usize = 4096;
 /// Ops a document may hold in its causal buffer (missing dependencies).
@@ -267,6 +270,7 @@ impl Server {
             Some("css") => "text/css; charset=utf-8",
             Some("svg") => "image/svg+xml",
             Some("json") | Some("map") => "application/json",
+            Some("webmanifest") => "application/manifest+json",
             _ => "application/octet-stream",
         };
         match std::fs::read(&file) {
@@ -284,7 +288,14 @@ impl Server {
         let writer = std::thread::spawn(move || {
             // Coalesce queued frames into one write: far fewer syscalls under load.
             let mut buf = Vec::new();
-            while let Ok(frame) = rx.recv() {
+            loop {
+                let frame = match rx.recv_timeout(KEEPALIVE) {
+                    Ok(f) => f,
+                    Err(RecvTimeoutError::Timeout) => {
+                        Arc::new(ws::encode_frame(ws::OP_PING, b"keepalive", None))
+                    }
+                    Err(RecvTimeoutError::Disconnected) => break,
+                };
                 buf.clear();
                 buf.extend_from_slice(&frame);
                 while buf.len() < 64 * 1024 {

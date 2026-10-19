@@ -17,7 +17,7 @@ browser (TypeScript)                      server (Rust, std only)
 
 - **Custom sequence CRDT.** The merge rule is Fugue (list form, equivalent to YjsMod), so concurrent typing never interleaves, whether people type forwards or backwards. It is implemented twice, in Rust and TypeScript, and the two are checked against each other.
 - **Fast storage.** Rust uses blocks + Fenwick trees with an id index, and is about 160× faster than a naive `Vec` at 50K ops. TypeScript uses square-root decomposition.
-- **Offline-first.** Edits persist to IndexedDB and are shared between tabs over BroadcastChannel. On reconnect, a version-vector handshake syncs exactly the missing ops in both directions, with no acks needed.
+- **Offline-first, installable.** A service worker lets the app open with no network, and it installs as an app (PWA). Edits persist to IndexedDB and are shared between tabs over BroadcastChannel. On reconnect, a version-vector handshake syncs exactly the missing ops in both directions, with no acks needed.
 - **Live cursors and presence.** Cursors are anchored to character ids, not offsets, so they stay on the right character while others edit.
 - **Undo/redo of only your own edits.** Undo issues new inverse ops, so it never rewinds a collaborator's work. Undone deletes reappear exactly where they were.
 - **Std-only Rust server** (no crates): RFC 6455 WebSockets, a JSON parser, rooms, bounded per-client outboxes that drop slow consumers, and a group-commit op log that survives torn writes.
@@ -61,6 +61,7 @@ cargo run --release --example bench -p crdt-core
 | `web/test/crosslang.mjs` + `trace` bin | TypeScript and Rust CRDTs agree byte-for-byte |
 | `web/test/editor.mjs` | Textarea diffing (selections, emoji, backspace) and caret preservation, via a DOM shim |
 | `web/test/e2e.mjs` | Real TS clients + server: one client offline mid-session, late joiner, undo/redo |
+| `web/test/browser.mjs` | Two Chromium "devices": live sync, cursors, both offline, reload with no network, merge, undo, layout |
 | `loadtest` bin | N clients, latency percentiles, final byte-identical check against the server |
 
 Mutation checks were run on purpose: flipping the tie-break, disabling the scan state and breaking the Fenwick update each make the suite fail.
@@ -81,7 +82,7 @@ docs/                  DESIGN.md, BENCHMARKS.md
 - **The version vector grows by one entry per editing session,** because each page load is a new replica. Yjs has the same trade-off.
 - **No authentication.** Anyone with a document name can edit it, and the server trusts clients' ops.
 - **One element per character,** about 214 bytes per item including the op log. Run-length encoding would cut this sharply.
-- **The browser UI was verified with a DOM shim, not in a real browser, in this environment.** Docker/Fly deployment files are included but were not run.
+- **Real-browser tests run in headless Chromium only.** Safari and Firefox are untested. Docker/Fly files have not yet been run end to end.
 
 ## License
 

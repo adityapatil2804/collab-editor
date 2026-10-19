@@ -33,4 +33,11 @@ SERVER_ADDR="127.0.0.1:$PORT"
 (cd web && SERVER="$SERVER_ADDR" node test/e2e.mjs)
 ./target/release/loadtest --addr "$SERVER_ADDR" --clients 20 --edits 50 --interval-ms 50 | grep -E "identical|p99"
 
+if node -e "require('playwright')" 2>/dev/null || [ -d /opt/node22/lib/node_modules/playwright ]; then
+  echo "== Real browser (Chromium)"
+  (cd web && SERVER="$SERVER_ADDR" node test/browser.mjs)
+else
+  echo "== Real browser: skipped (npm i -D playwright && npx playwright install chromium)"
+fi
+
 echo "== All checks passed"

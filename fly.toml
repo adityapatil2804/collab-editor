@@ -1,5 +1,8 @@
-# Deploy: fly launch --no-deploy && fly volumes create collab_data --size 1 && fly deploy
-app = "collab-editor"
+# Deploy (app names are global; change it if taken):
+#   fly apps create collab-editor-adityapatil
+#   fly volumes create collab_data --size 1 --region ewr --yes
+#   fly deploy
+app = "collab-editor-adityapatil"
 primary_region = "ewr"
 
 [build]

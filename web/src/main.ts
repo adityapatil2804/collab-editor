@@ -140,6 +140,12 @@ async function main() {
   sync.connect();
   sync.sendPresence({ ...me, cursor: null });
   window.addEventListener("pagehide", () => saveOps(docName, doc.log));
+  window.addEventListener("online", () => sync.retryNow());
+
+  // Service worker: lets the app open with no network (needs HTTPS or localhost).
+  if ("serviceWorker" in navigator && window.isSecureContext) {
+    navigator.serviceWorker.register("sw.js").catch((e) => console.warn("service worker:", e));
+  }
 }
 
 main();

@@ -1,0 +1,11 @@
+{
+  "name": "Collab Editor",
+  "short_name": "Collab",
+  "description": "Real-time collaborative text editor that works offline",
+  "start_url": "./?doc=welcome",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f3ec",
+  "theme_color": "#b5480f",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

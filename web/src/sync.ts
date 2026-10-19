@@ -100,6 +100,15 @@ export class SyncClient {
     }
   }
 
+  /** The network came back: retry now instead of waiting out the backoff. */
+  retryNow(): void {
+    if (this.wantOffline || this.ws) return;
+    if (this.timer) clearTimeout(this.timer);
+    this.timer = null;
+    this.retries = 0;
+    this.connect();
+  }
+
   close(): void {
     this.setOffline(true);
   }

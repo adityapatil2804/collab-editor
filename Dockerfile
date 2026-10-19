@@ -14,7 +14,7 @@ RUN npx tsc -p .
 
 FROM debian:bookworm-slim
 COPY --from=server /src/target/release/collab-server /usr/local/bin/collab-server
-COPY web/index.html web/style.css /srv/web/
+COPY web/index.html web/style.css web/sw.js web/manifest.webmanifest web/icon.svg /srv/web/
 COPY --from=web /web/dist /srv/web/dist
 VOLUME /data
 EXPOSE 8080
